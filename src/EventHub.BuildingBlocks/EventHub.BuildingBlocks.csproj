@@ -5,6 +5,7 @@
     <Authors>EventHub</Authors>
     <Description>EventHub shared kernel: domain primitives, Result, observability (correlation/Serilog/OpenTelemetry), security, and clock abstractions.</Description>
     <PackageTags>eventhub;buildingblocks;kernel</PackageTags>
+    <RepositoryUrl>https://github.com/TatoTopuria/EventHub.BuildingBlocks</RepositoryUrl>
     <!-- This package deliberately depends on the pinned OpenTelemetry.Instrumentation.GrpcNetClient
          1.11.0-beta.2 prerelease (see comment below). NU5104 flags a stable package with a prerelease
          dependency; that is intentional for this internal package, so suppress it for pack. -->

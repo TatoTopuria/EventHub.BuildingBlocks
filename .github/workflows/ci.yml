@@ -39,8 +39,11 @@ jobs:
 
   publish:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -48,10 +51,9 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Pack
         run: dotnet pack src/EventHub.BuildingBlocks/EventHub.BuildingBlocks.csproj -c Release -o ./artifacts
-      # Requires repo variable EVENTHUB_NUGET_FEED + secret NUGET_FEED_API_KEY (the durable feed).
       - name: Push to feed
         run: >-
           dotnet nuget push "./artifacts/*.nupkg"
-          --source "${{ vars.EVENTHUB_NUGET_FEED }}"
-          --api-key "${{ secrets.NUGET_FEED_API_KEY }}"
+          --source "${{ vars.EVENTHUB_NUGET_FEED || 'https://nuget.pkg.github.com/tatotopuria/index.json' }}"
+          --api-key "${{ secrets.GITHUB_TOKEN }}"
           --skip-duplicate
