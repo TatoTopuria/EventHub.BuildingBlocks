@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <Authors>EventHub</Authors>
+    <Description>EventHub shared kernel: domain primitives, Result, observability (correlation/Serilog/OpenTelemetry), security, and clock abstractions.</Description>
+    <PackageTags>eventhub;buildingblocks;kernel</PackageTags>
+    <!-- This package deliberately depends on the pinned OpenTelemetry.Instrumentation.GrpcNetClient
+         1.11.0-beta.2 prerelease (see comment below). NU5104 flags a stable package with a prerelease
+         dependency; that is intentional for this internal package, so suppress it for pack. -->
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Elasticsearch" />
+    <!-- F7 observability hardening: OpenTelemetry tracing pinned to a stable set so trace
+         context flows through ASP.NET, outbound HTTP, outbound gRPC, and MassTransit without
+         each service wiring it manually. Console exporter is always on for local dev; the OTLP
+         exporter activates when Observability:Otlp:Endpoint is configured.
+         1.10+ chosen over 1.9.0 to clear NU1902 (GHSA-4625-4j76-fww9 in the OTLP exporter). -->
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <!-- GHSA-4625-4j76-fww9 is a moderate advisory on the OTLP exporter with no patched version
+         shipped at the time of writing. We tolerate it here because F7's default deployment uses
+         the Console exporter (no OTLP endpoint) — the OTLP exporter activates only when an
+         operator opts in via Observability:Otlp:Endpoint. Drop NoWarn once a patched OTel
+         exporter ships and bump to it. -->
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" NoWarn="NU1902" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" />
+    <!-- OpenTelemetry 1.10 transitively pulls Microsoft.Extensions.* 9.0.0. Other packages in
+         the solution still declare 8.0.x, which triggers NU1605 downgrade warnings (promoted to
+         errors by TreatWarningsAsErrors). Pin them directly at the highest level here so
+         consuming projects inherit the 9.0.0 version through the BuildingBlocks ProjectReference
+         without each one needing its own explicit pin. Targets net8.0 happily — these packages
+         multi-target netstandard2.0/net8.0/net9.0. -->
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+  </ItemGroup>
+
+</Project>

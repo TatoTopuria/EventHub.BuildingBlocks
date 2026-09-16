@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EventHub.BuildingBlocks/EventHub.BuildingBlocks.csproj" />
+  </Folder>
+</Solution>
